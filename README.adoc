@@ -1,0 +1,218 @@
+= Challenge 3: Boosting the Performance and Availability of Spring Boot with Datagrid Caches
+Álvaro López Medina <alopezme@redhat.com>; Katia Aresti <karesti@redhat.com>
+v1.0, 2021-09
+// Create TOC wherever needed
+:toc: macro
+:sectanchors:
+:sectnumlevels: 2
+// :sectnums: 
+:source-highlighter: pygments
+// :imagesdir: images
+// Start: Enable admonition icons
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+:icons: font
+endif::[]
+// End: Enable admonition icons
+
+// Create the Table of contents here
+toc::[]
+
+== Introduction
+
+In this challenge, you will learn how to take advantage of Spring Cache and Spring Session to easily boost the performance of a Spring Boot application. As this exercise is focused on the Spring Boot client, you will be provided with the configuration of the caches as well as the configuration of the server on Openshift.
+
+
+[IMPORTANT]
+====
+The application developed in this challenge requires an instance of RH Data Grid 8.2 or Infinispan running to connect to. The final result has to run on Openshift, but for development purposes, you may want to use a local environment. Guidelines to deploy your Data Grid locally can be found in section <<setting-up-your-local-development-environment, Setting up your local development environment>>.
+
+Otherwise, we recommend you to use the CodeReady Workspaces instance deployed in your Openshift cluster.
+====
+
+
+== Exercise 1: Challenge first steps
+
+At the end of this exercise, you will have your application ready to code all the features required in this challenge. Please, before continuing to the next exercise, make sure that:
+
+- The application compiles, connects to Data Grid locally and runs.
+- The Infinispan Spring Boot Starter dependency is in place.
+- The necessary properties in the `application.properties` are configured.
+- [Only local] Data Grid 8.2 or Infinispan 12.1.x.Final is running locally (through a container or by using the binaries).
+
+As this is a Spring Boot application, running it is as simple as executing the following command:
+[source, bash]
+----
+mvn clean spring-boot:run
+----
+
+== Exercise 2: Spring Cache
+
+Once your application is running, run `time weatherFetcher.sh`. It should take a few seconds to complete.
+
+Use Spring Cache to decrease the execution time as much as you can.
+
+[TIP]
+====
+By default, Java Serialization is not enabled for any Java package. Set the property called `java-serial-allowlist`, with the correct Java package.
+
+Find more info in this https://infinispan.org/docs/dev/titles/spring_boot/starter.html#spring-boot-serialization_remote[section] of the documentation.
+====
+
+In order to make sure that Spring Cache is correctly configured and that entries are being cached, you can access the Data Grid web console to check the number of entries stored.
+
+[TIP]
+====
+In this challenge, the Data Grid server is configured to use authentication. Therefore, you will need a username and password to connect your client application as well as access the web console.
+
+As any other other product, credentials are stored as secrets. Check the https://access.redhat.com/documentation/en-us/red_hat_data_grid/8.2/guide/91110b44-61b6-4916-a9c9-a574a8d3c46c[documentation] for more information
+====
+
+
+
+
+== Exercise 2.1: Spring Cache without null values
+
+Spring Cache provides many functionalities. One of them is to avoid the caching of null values. Use this feature to avoid caching and requesting null temperatures every time that the test is run.
+
+Keep in mind that values might be stored from the previous execution! You have to clean the cache before executing the new code again. There are multiple methods, you may explore clearing the cache from the Java client or using the Web Console
+
+
+[TIP]
+====
+When you have finished this section, go to the Data Grid console. The statistics tab should display 10 entries instead of 11. 
+If this is your value, congrats! You are not storing null values.
+====
+
+
+== Exercise 3: Spring Session
+
+
+Data Grid also provides an implementation for Spring Session. Use this feature to store clients' sessions, so that you do not lose the data if the application restarts.
+
+You should store the latest city requested by each user in the user session. Users will be able to check the latest city using a REST endpoint. 
+
+
+[TIP]
+====
+The Spring Session implementation does not check if the cache for sessions is configured on the server side. 
+Make sure that the cache exists on Data Grid before launching your application!!
+====
+
+
+
+== Exercise 4: Running your application of Openshift
+
+Whether you decided to start coding locally or on CodeReady Workspaces, you will need to run your application in its own pod at some point. In this section, we will help you to do so!
+
+[CAUTION]
+====
+Executing your application from CodeReady Workspaces is not enough to consider that your application is running on Openshift.
+====
+
+First, you need to create an image based on a Java image. I suggest using an image like `ubi8-openjdk-11`. You can find more information https://catalog.redhat.com/software/containers/ubi8/openjdk-11/5dd6a4b45a13461646f677f4[here]. You can create this image using the s2i utility that provides Openshift. Follow this https://docs.openshift.com/container-platform/4.7/openshift_images/using_images/using-s21-images.html[link] for more information.
+
+Second, you need to deploy your image on your Openshift project. I recommend you to use a Deployment or DeploymentConfig.
+
+Third, you have to configure your client to connect to the Data Grid server. All the configuration that can change should be in the `application.properties`.
+
+[TIP]
+====
+If you are a little bit lost, maybe you can check https://github.com/alvarolop/rhdg8-client#52-running-the-client-on-openshift
+[this] example of configuration. 
+
+Ask questions if you are stuck in this section!!
+====
+
+
+
+==  [Optional] Setting up your local development environment
+
+
+To run this application locally, you will need all the following requirements met:
+
+* To run your client application:
+** JDK 11+ installed with JAVA_HOME configured appropriately.
+** Apache Maven 3.8.1+
+* To run your server:
+** Check section below.
+* To execute scripts:
+** Bash console.
+** `curl` command installed.
+* To deliver the exercise and work as a group:
+** A `git` account.
+
+
+Run your server locally using one of these two options:
+
+=== Running Infinispan inside a container
+
+Running the server using a container image is as simple as executing the following command:
+
+[source, bash]
+----
+podman run -p 11222:11222 -e USER="admin" -e PASS="password" quay.io/infinispan/server:12.1.7.Final-1
+----
+
+If the server is up and running, you should see the following logs:
+
+[source, bash]
+----
+17:29:38,655 INFO  (main) [org.infinispan.SERVER] ISPN080018: Started connector REST (internal)
+17:29:38,865 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SINGLE_PORT (default) listening on 10.0.2.100:11222
+17:29:38,903 INFO  (main) [org.infinispan.SERVER] ISPN080001: Infinispan Server 12.1.7.Final started in 6149ms
+----
+
+
+There is a known compatibility issue in the Docker For Mac and the Infinispan Client. Explanations can be found in
+https://blog.infinispan.org/2018/03/accessing-infinispan-inside-docker-for.html[this blog post].
+You **won't need to do this in your production environment**, but Docker for Mac users have to configure the following 
+property in the file `src/main/resources/META-INF/resources/hotrod-client.properties`: 
+
+[source, yaml]
+----
+quarkus.infinispan-client.client-intelligence=BASIC
+----
+
+=== Running Infinispan from its binaries
+
+Follow the steps below:
+
+- Download server binaries from the https://infinispan.org/download/[Infinispan Downloads website]. Choose version `12.1.7.Final`.
+- Unzip the file and `cd` into the folder. 
+- Run the server using the script: `./bin/server.sh`.
+
+If the server is up and running, you should see the following logs:
+
+[source, bash]
+----
+17:29:38,655 INFO  (main) [org.infinispan.SERVER] ISPN080018: Started connector REST (internal)
+17:29:38,865 INFO  (main) [org.infinispan.SERVER] ISPN080004: Connector SINGLE_PORT (default) listening on 10.0.2.100:11222
+17:29:38,903 INFO  (main) [org.infinispan.SERVER] ISPN080001: Infinispan Server 12.1.7.Final started in 4399ms
+----
+
+
+
+
+== Documentation and Resources for this challenge
+
+In order to be successful in this  challenge, you will need to check extra documentation. Here you can find some useful links:
+
+* https://infinispan.org/get-started[Running an Infinispan server locally].
+* https://infinispan.org/docs/dev/titles/spring_boot/starter.html[Infinispan Spring Boot starter].
+
+
+
+== Need help?
+
+Remember that we are all here to answer any questions and support you during all the Developer Games:
+
+* Katia Aresti - karestig@redhat.com
+* Álvaro López - alopezme@redhat.com
+
