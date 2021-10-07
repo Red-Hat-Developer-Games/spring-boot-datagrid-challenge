@@ -40,14 +40,37 @@
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-core</artifactId>
 			<version>${version.spring.session}</version>
-		</dependency>
+        </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
 
 		<!-- adds the dependency to connect to infinispan / data grid server and spring boot -->
 		<dependency>
 			<groupId>org.infinispan</groupId>
 			<artifactId>infinispan-spring-boot-starter-remote</artifactId>
 			<version>${version.infinispan}</version>
-		</dependency>
+        </dependency>
+
+
+<dependency>
+<groupId>org.infinispan</groupId>
+<artifactId>infinispan-core</artifactId>
+</dependency>
+<dependency>
+<groupId>org.infinispan</groupId>
+<artifactId>infinispan-spring5-remote</artifactId>
+</dependency>
+
+<!-- Thanks for using https://jar-download.com -->
+
+
 
 	</dependencies>
 

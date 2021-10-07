@@ -1,6 +1,9 @@
 package com.redhat.developergames.config;
 
+import org.infinispan.spring.remote.provider.SpringRemoteCacheManagerFactoryBean;
+import org.infinispan.spring.remote.session.configuration.EnableInfinispanRemoteHttpSession;
 import org.infinispan.spring.starter.remote.InfinispanRemoteCacheCustomizer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -9,8 +12,15 @@ import org.springframework.core.annotation.Order;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+@EnableCaching
+@EnableInfinispanRemoteHttpSession
 @Configuration
 public class InfinispanConfiguration {
+
+     @Bean
+     public SpringRemoteCacheManagerFactoryBean springCache() {
+         return new SpringRemoteCacheManagerFactoryBean();
+     }
 
    @Bean
    @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -33,4 +43,7 @@ public class InfinispanConfiguration {
       }
       return cacheConfigUri;
    }
+
+
+   
 }

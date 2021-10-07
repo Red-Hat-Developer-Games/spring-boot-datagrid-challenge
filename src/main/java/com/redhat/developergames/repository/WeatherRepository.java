@@ -2,6 +2,8 @@ package com.redhat.developergames.repository;
 
 import com.redhat.developergames.model.Weather;
 import com.redhat.developergames.model.WeatherCondition;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -25,6 +27,7 @@ public class WeatherRepository {
 
    private Random random = new Random();
 
+   @Cacheable(value="weather",key="#location", unless="#result==null" )
    public Weather getByLocation(String location) {
       return fetchWeather(location);
    }
