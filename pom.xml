@@ -14,7 +14,7 @@
 	<name>Boosting the Performance and Availability of Spring Boot with Datagrid Caches</name>
 	<description>Challenge to learn how to use Spring Cache and Spring Session with Data Grid.</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>8</java.version>
 		<version.infinispan>12.1.7.Final</version.infinispan>
 		<version.protostream>4.4.1.Final</version.protostream>
 		<version.spring.session>2.4.2</version.spring.session>
